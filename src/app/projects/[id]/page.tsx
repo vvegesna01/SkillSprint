@@ -2,11 +2,12 @@
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Clock, Lightbulb, CheckCircle2 } from "lucide-react";
+import { Clock, Lightbulb, CheckCircle2, ArrowLeft, ArrowRight, Bookmark, BookmarkCheck, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { projects } from "@/lib/mockData";
 import { SkillBadge } from "@/components/SkillBadge";
 import { SavedProject } from "@/lib/types";
+import { cn } from "cn";
 
 export default function ProjectDetail() {
   const params = useParams();
@@ -44,106 +45,155 @@ export default function ProjectDetail() {
 
   if (!project) {
     return (
-      <div className="max-w-4xl mx-auto py-12 px-6">
-        <h1 className="text-2xl font-bold mb-4">Project not found</h1>
-        <Link href="/projects" className="text-emerald-600 hover:underline">
-          &larr; Back to Projects
-        </Link>
+      <div className="min-h-screen">
+        <div className="border-b border-gray-200 bg-white px-6 py-3 flex items-center gap-3">
+          <Link href="/projects" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back
+          </Link>
+        </div>
+        <div className="max-w-4xl mx-auto py-20 px-6 text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Lightbulb className="w-7 h-7 text-gray-400" />
+          </div>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Project not found</h1>
+          <p className="text-sm text-gray-500 mb-6">This project may have been removed or doesn't exist.</p>
+          <Link href="/projects" className="text-sm text-[#4F46E5] font-medium hover:underline">
+            Browse all projects
+          </Link>
+        </div>
       </div>
     );
   }
 
+  const difficultyColor = {
+    Beginner: "bg-green-50 text-green-700 border-green-200",
+    Intermediate: "bg-amber-50 text-amber-700 border-amber-200",
+    Advanced: "bg-red-50 text-red-700 border-red-200",
+  };
+
+  const milestones = project.milestones ?? [];
+  const techStack = project.techStack ?? project.skills;
+
   return (
-    <div className="max-w-4xl mx-auto py-12 px-6">
-      <Link href="/projects" className="inline-block text-emerald-600 hover:text-emerald-700 font-medium mb-6">
-        &larr; Back to Projects
-      </Link>
-      
-      <div className="bg-white rounded-xl border p-8 mb-8 shadow-sm">
-        <div className="flex flex-wrap gap-3 mb-4">
-          <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
-            {project.category}
-          </span>
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-            project.difficulty === 'Beginner' ? 'bg-green-100 text-green-700' :
-            project.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-700' :
-            'bg-red-100 text-red-700'
-          }`}>
-            {project.difficulty}
-          </span>
-          <span className="flex items-center text-gray-500 text-sm ml-auto">
-            <Clock className="w-4 h-4 mr-1" />
-            {project.hours} hours
-          </span>
+    <div className="min-h-screen">
+      {/* Header Bar */}
+      <div className="border-b border-gray-200 bg-white px-6 py-3 flex items-center gap-3">
+        <div className="flex items-center gap-1 text-gray-400">
+          <Link href="/projects" className="p-1 hover:text-gray-600 transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+          </Link>
+          <button className="p-1 hover:text-gray-600 transition-colors"><ArrowRight className="w-4 h-4" /></button>
         </div>
-        
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">{project.title}</h1>
-        <p className="text-lg text-gray-600 mb-8">{project.description}</p>
-        
-        <button
-          onClick={handleSave}
-          disabled={isSaved}
-          className={`flex items-center px-6 py-3 rounded-lg font-medium transition-colors ${
-            isSaved 
-              ? 'bg-gray-100 text-gray-500 cursor-not-allowed' 
-              : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
-          }`}
-        >
-          {isSaved ? (
-            <>
-              <CheckCircle2 className="w-5 h-5 mr-2 text-emerald-500" />
-              Added to My Projects ✓
-            </>
-          ) : (
-            'Add to My Projects'
-          )}
-        </button>
-      </div>
-
-      <div className="bg-emerald-50/50 border border-emerald-100 border-l-4 border-l-emerald-500 rounded-lg p-6 mb-8 flex gap-4">
-        <div className="mt-1">
-          <Lightbulb className="w-6 h-6 text-emerald-600" />
-        </div>
-        <div>
-          <h3 className="text-lg font-bold text-gray-900 mb-2">Why You Should Build This</h3>
-          <p className="text-gray-700 leading-relaxed">{project.whyThisProject}</p>
+        <div className="flex items-center gap-2 text-sm">
+          <Link href="/projects" className="text-gray-500 hover:text-gray-700 transition-colors">Projects</Link>
+          <span className="text-gray-300">/</span>
+          <span className="font-semibold text-gray-900 truncate max-w-[300px]">{project.title}</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-        <div>
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Skills You'll Practice</h3>
-          <div className="flex flex-wrap gap-2">
-            {project.skills.map((skill) => (
-              <SkillBadge key={skill} skill={skill} variant="new" />
-            ))}
-          </div>
-        </div>
-        <div>
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Suggested Tech Stack</h3>
-          <div className="flex flex-wrap gap-2">
-            {project.techStack.map((tech) => (
-              <span key={tech} className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-sm font-medium border border-gray-200">
-                {tech}
+      <div className="max-w-4xl mx-auto p-6 space-y-6">
+        {/* Title Card */}
+        <div className="bg-white border border-gray-200 rounded-xl p-8">
+          <div className="flex items-start justify-between mb-5">
+            <div className="flex flex-wrap gap-2">
+              <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-medium border border-indigo-200">
+                {project.category}
               </span>
-            ))}
+              <span className={cn("px-3 py-1 rounded-lg text-xs font-medium border", difficultyColor[project.difficulty])}>
+                {project.difficulty}
+              </span>
+              <span className="flex items-center gap-1 px-3 py-1 bg-gray-50 text-gray-500 rounded-lg text-xs font-medium border border-gray-200">
+                <Clock className="w-3 h-3" />
+                {project.hours} hours
+              </span>
+            </div>
+            <button
+              onClick={handleSave}
+              disabled={isSaved}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                isSaved
+                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  : "bg-[#4F46E5] text-white hover:bg-[#4338CA] shadow-sm shadow-indigo-200"
+              )}
+            >
+              {isSaved ? (
+                <><BookmarkCheck className="w-4 h-4" /> Saved</>
+              ) : (
+                <><Bookmark className="w-4 h-4" /> Save Project</>
+              )}
+            </button>
+          </div>
+          
+          <h1 className="text-2xl font-bold text-gray-900 mb-3 leading-tight">{project.title}</h1>
+          <p className="text-gray-500 leading-relaxed">{project.description}</p>
+        </div>
+
+        {/* Why Build This */}
+        {project.whyThisProject && (
+          <div className="bg-indigo-50/50 border border-indigo-100 rounded-xl p-6 flex gap-4">
+            <div className="flex-shrink-0 mt-0.5">
+              <div className="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center">
+                <Lightbulb className="w-5 h-5 text-indigo-600" />
+              </div>
+            </div>
+            <div>
+              <h3 className="text-[15px] font-bold text-gray-900 mb-1.5">Why You Should Build This</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">{project.whyThisProject}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Skills & Tech Stack */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="bg-white border border-gray-200 rounded-xl p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="w-4 h-4 text-[#4F46E5]" />
+              <h3 className="text-[15px] font-bold text-gray-900">Skills You'll Practice</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {project.skills.map((skill) => (
+                <SkillBadge key={skill} skill={skill} variant="new" />
+              ))}
+            </div>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <h3 className="text-[15px] font-bold text-gray-900">Suggested Tech Stack</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {techStack.map((tech) => (
+                <span key={tech} className="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium border border-gray-200">
+                  {tech}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-8">Project Milestones</h3>
-        <div className="relative border-l-2 border-gray-200 ml-4 space-y-8 pb-4">
-          {project.milestones.map((milestone, index) => (
-            <div key={index} className="relative pl-8">
-              <div className="absolute -left-4 top-0 w-8 h-8 rounded-full bg-emerald-500 border-4 border-white flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                {index + 1}
-              </div>
-              <h4 className="text-lg font-bold text-gray-900 mb-2">{milestone.title}</h4>
-              <p className="text-gray-600">{milestone.description}</p>
+        {/* Milestones */}
+        {milestones.length > 0 && (
+          <div className="bg-white border border-gray-200 rounded-xl p-8">
+            <h3 className="text-lg font-bold text-gray-900 mb-6">Project Milestones</h3>
+            <div className="relative ml-4 space-y-0">
+              {milestones.map((milestone, index) => (
+                <div key={index} className="relative pl-8 pb-6 last:pb-0">
+                  {/* Connecting line */}
+                  {index < milestones.length - 1 && (
+                    <div className="absolute left-[11px] top-[28px] bottom-0 w-[2px] bg-gray-200" />
+                  )}
+                  {/* Step circle */}
+                  <div className="absolute left-0 top-0 w-6 h-6 rounded-full bg-[#4F46E5] flex items-center justify-center text-white font-bold text-[11px] shadow-sm">
+                    {index + 1}
+                  </div>
+                  <h4 className="text-[15px] font-semibold text-gray-900 mb-1">{milestone.title}</h4>
+                  <p className="text-sm text-gray-500 leading-relaxed">{milestone.description}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

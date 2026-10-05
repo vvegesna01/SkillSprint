@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Briefcase, AlertCircle, ArrowRight } from "lucide-react";
+import { CheckCircle2, Briefcase, AlertCircle, ArrowRight, ArrowLeft } from "lucide-react";
 import { userSkills as defaultUserSkills, targetSkills as defaultTargetSkills, mockSkillGapResult } from "@/lib/mockData";
 import { ProgressBar } from "@/components/ProgressBar";
 import { SkillGapCard } from "@/components/SkillGapCard";
@@ -52,52 +52,60 @@ export default function ResultsPage() {
   }, []);
 
   return (
-    <div className="container mx-auto py-12 px-4 max-w-6xl space-y-8">
-      <div>
-        <h1 className="text-4xl font-bold mb-2">Your Skill Gap Analysis</h1>
-        <p className="text-lg text-muted-foreground">
-          Based on your resume and target role requirements
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1 flex flex-col items-center justify-center p-8 bg-card border rounded-xl shadow-sm text-center">
-          <ProgressBar percentage={analysis.matchPercentage} size="lg" />
-          <p className="mt-6 font-medium text-lg">Estimated skill overlap</p>
-          <p className="text-sm text-muted-foreground mt-2 max-w-[250px]">
-            Calculated via sentence embeddings semantic matching
-          </p>
+    <div className="min-h-screen">
+      {/* Header Bar */}
+      <div className="border-b border-gray-200 bg-white px-6 py-3 flex items-center gap-3">
+        <div className="flex items-center gap-1 text-gray-400">
+          <button className="p-1 hover:text-gray-600 transition-colors"><ArrowLeft className="w-4 h-4" /></button>
+          <button className="p-1 hover:text-gray-600 transition-colors"><ArrowRight className="w-4 h-4" /></button>
         </div>
-
-        <div className="lg:col-span-2 space-y-6">
-          <SkillGapCard 
-            title="Your Current Skills"
-            skills={analysis.userSkills}
-            variant="current"
-            icon={<CheckCircle2 className="w-5 h-5 text-emerald-500" />}
-          />
-          <SkillGapCard 
-            title="Target Job Requirements"
-            skills={analysis.targetSkills}
-            variant="required"
-            icon={<Briefcase className="w-5 h-5 text-blue-500" />}
-          />
-          <SkillGapCard 
-            title="Skills to Develop"
-            skills={analysis.missingSkills.length > 0 ? analysis.missingSkills : ["All target skills matched!"]}
-            variant="missing"
-            icon={<AlertCircle className="w-5 h-5 text-amber-500" />}
-          />
+        <div className="flex items-center gap-2 text-sm">
+          <span className="font-semibold text-gray-900">Skill Gap Analysis</span>
+          <span className="text-gray-300">&middot;</span>
+          <span className="text-gray-500">Based on your resume and target role requirements</span>
         </div>
       </div>
 
-      <div className="flex justify-center pt-8">
-        <Link 
-          href="/projects" 
-          className="inline-flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-8 py-4 text-lg font-medium shadow-md hover:shadow-lg transition-all"
-        >
-          View Project Recommendations <ArrowRight className="ml-2 w-5 h-5" />
-        </Link>
+      <div className="p-6 max-w-[1100px] space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1 flex flex-col items-center justify-center p-8 bg-white border border-gray-200 rounded-xl text-center">
+            <ProgressBar percentage={analysis.matchPercentage} size="lg" />
+            <p className="mt-6 font-semibold text-gray-900 text-lg">Estimated skill overlap</p>
+            <p className="text-sm text-gray-500 mt-2 max-w-[250px]">
+              Calculated via sentence embeddings semantic matching
+            </p>
+          </div>
+
+          <div className="lg:col-span-2 space-y-5">
+            <SkillGapCard 
+              title="Your Current Skills"
+              skills={analysis.userSkills}
+              variant="current"
+              icon={<CheckCircle2 className="w-5 h-5 text-emerald-500" />}
+            />
+            <SkillGapCard 
+              title="Target Job Requirements"
+              skills={analysis.targetSkills}
+              variant="required"
+              icon={<Briefcase className="w-5 h-5 text-[#4F46E5]" />}
+            />
+            <SkillGapCard 
+              title="Skills to Develop"
+              skills={analysis.missingSkills.length > 0 ? analysis.missingSkills : ["All target skills matched!"]}
+              variant="missing"
+              icon={<AlertCircle className="w-5 h-5 text-amber-500" />}
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-center pt-4">
+          <Link 
+            href="/projects" 
+            className="inline-flex items-center justify-center bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-xl px-8 py-3.5 text-base font-medium shadow-md shadow-indigo-200/60 hover:shadow-lg transition-all"
+          >
+            View Project Recommendations <ArrowRight className="ml-2 w-5 h-5" />
+          </Link>
+        </div>
       </div>
     </div>
   );

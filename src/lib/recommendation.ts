@@ -1,4 +1,5 @@
 import { Project, Difficulty, ProjectCategory } from './projects';
+import { isSkillCovered, skillsMatch } from './skillTaxonomy';
 
 export interface FilterOptions {
   difficulty?: Difficulty | 'All';
@@ -17,11 +18,13 @@ export interface RecommendationResult {
 
 /**
  * Calculates missing skills given user skills and target skills.
- * Handles case-insensitive and normalized skill matching.
+ * Uses synonym-aware matching (see skillTaxonomy.ts) so equivalent skills
+ * phrased differently (e.g. "K8s" vs "Kubernetes") aren't treated as gaps.
+ * This is the offline stand-in for the backend's embedding-based matching,
+ * used when /analyze is unreachable.
  */
 export function calculateMissingSkills(userSkills: string[], targetSkills: string[]): string[] {
-  const normalizedUserSkills = new Set(userSkills.map(s => s.trim().toLowerCase()));
-  return targetSkills.filter(target => !normalizedUserSkills.has(target.trim().toLowerCase()));
+  return targetSkills.filter(target => !isSkillCovered(target, userSkills));
 }
 
 /**
@@ -29,8 +32,7 @@ export function calculateMissingSkills(userSkills: string[], targetSkills: strin
  */
 export function calculateMatchPercentage(userSkills: string[], targetSkills: string[]): number {
   if (targetSkills.length === 0) return 100;
-  const normalizedUserSkills = new Set(userSkills.map(s => s.trim().toLowerCase()));
-  const matchedCount = targetSkills.filter(target => normalizedUserSkills.has(target.trim().toLowerCase())).length;
+  const matchedCount = targetSkills.filter(target => isSkillCovered(target, userSkills)).length;
   return Math.round((matchedCount / targetSkills.length) * 100);
 }
 
@@ -49,12 +51,11 @@ export function recommendProjects(
   options?: FilterOptions
 ): RecommendationResult[] {
   const missingSkills = calculateMissingSkills(userSkills, targetSkills);
-  const normalizedMissing = missingSkills.map(s => s.toLowerCase());
 
   const results: RecommendationResult[] = projectsList.map(project => {
     // 1. Identify skills in the project that address missing skills
     const matchedGapSkills = project.skills.filter(skill =>
-      normalizedMissing.includes(skill.toLowerCase())
+      missingSkills.some(gap => skillsMatch(gap, skill))
     );
 
     const totalMissingAddressed = matchedGapSkills.length;

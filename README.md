@@ -1,4 +1,19 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SkillSprint
+
+Upload your resume, describe a target role, and get project recommendations
+that close the exact skills you're missing — ranked by how much of your
+skill gap each one closes.
+
+The app has two parts:
+- **Frontend** — this Next.js app (`src/`). Handles the resume/profile UI,
+  project catalog, filtering, and saved-project tracking.
+- **Backend** — a FastAPI service (`backend/`) that does the actual skill
+  extraction and gap matching using sentence-transformer embeddings, so
+  "AWS" and "Amazon Web Services" are recognized as the same skill. See
+  [`backend/README.md`](./backend/README.md) for how that matching
+  pipeline works. If the backend isn't running, the frontend falls back
+  to a lightweight offline matcher (`src/lib/skillTaxonomy.ts`) that does
+  synonym-aware keyword matching instead of true embeddings.
 
 ## Getting Started
 
@@ -15,6 +30,10 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+For real semantic skill matching (rather than the offline fallback), also
+run the backend service — see [`backend/README.md`](./backend/README.md)
+for setup.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
